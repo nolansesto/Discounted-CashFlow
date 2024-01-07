@@ -1,0 +1,43 @@
+import yfinance as yf
+
+# aapl Intrinsic value calculation
+aapl = yf.Ticker ("aapl")
+outstandingshares = aapl.info['sharesOutstanding'] # Fetch number of shares
+
+# Assumptions:
+required_rate = 0.07
+perpetual_rate = 0.02
+cashflowgrowthrate = 0.03
+
+years = [1, 2, 3, 4]
+
+freecashflow = [99584000,111443000, 92953000, 73365000] #Last 4 years, in 1000s of $
+
+futurefreecashflow = []
+discountfactor = []
+discountedfuturefreecashflow = []
+
+terminalvalue = freecashflow[-1] * (1+perpetual_rate)/(required_rate-perpetual_rate)
+# print(terminalvalue)
+
+for year in years: 
+    cashflow = freecashflow[-1] *(1+ cashflowgrowthrate)**year
+    futurefreecashflow.append(cashflow)
+    discountfactor.append((1+ required_rate)**year)
+
+print(discountfactor)
+print(futurefreecashflow)
+
+for i in range(0, len(years)):
+    discountedfuturefreecashflow.append(futurefreecashflow[i]/discountfactor[i])
+
+# print(discountedfuturefreecashflow)
+
+discountedterminalvalue = terminalvalue/(1 + required_rate)**4
+discountedfuturefreecashflow.append(discountedterminalvalue)
+
+todaysvalue = sum(discountedfuturefreecashflow)
+
+fairvalue = todaysvalue*1000/outstandingshares
+
+print("The fair value of AAPL is ${}".format(round(fairvalue,2)))
